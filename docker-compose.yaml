@@ -1,0 +1,34 @@
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: kummerkasten
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/kummerkasten --quiet
+      interval: 5s
+      start_period: 5s
+      retries: 5
+      timeout: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: ./Dockerfile
+    ports:
+      - "80:80"
+
+volumes:
+  mongo-data:
